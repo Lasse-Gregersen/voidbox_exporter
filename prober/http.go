@@ -44,7 +44,7 @@ import (
 	"github.com/quic-go/quic-go/http3"
 	"golang.org/x/net/publicsuffix"
 
-	"github.com/prometheus/blackbox_exporter/config"
+	"github.com/Lasse-Gregersen/voidbox_exporter/config"
 )
 
 func matchRegularExpressions(reader io.Reader, httpConfig config.HTTPProbe, logger *slog.Logger) bool {
@@ -292,7 +292,7 @@ func (bc *byteCounter) Read(p []byte) (int, error) {
 	return n, err
 }
 
-var userAgentDefaultHeader = fmt.Sprintf("Blackbox-Exporter/%s", version.Version)
+var userAgentDefaultHeader = fmt.Sprintf("Voidbox-Exporter/%s", version.Version)
 
 func ProbeHTTP(ctx context.Context, target string, module config.Module, registry *prometheus.Registry, logger *slog.Logger) (success bool) {
 	var redirects int

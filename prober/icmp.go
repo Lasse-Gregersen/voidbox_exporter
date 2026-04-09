@@ -28,7 +28,7 @@ import (
 	"golang.org/x/net/ipv4"
 	"golang.org/x/net/ipv6"
 
-	"github.com/prometheus/blackbox_exporter/config"
+	"github.com/Lasse-Gregersen/voidbox_exporter/config"
 )
 
 var (
@@ -39,7 +39,7 @@ var (
 func init() {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	// Start the ICMP echo sequence at a random offset to prevent them from
-	// being in sync when several blackbox_exporter instances are restarted
+	// being in sync when several voidbox_exporter instances are restarted
 	// at the same time. See #411.
 	icmpSequence = uint16(r.Intn(1 << 16))
 }
@@ -47,7 +47,7 @@ func init() {
 func getRandomICMPID() int {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	// Generate a random ICMP ID for each probe to avoid potential clashes
-	// with other blackbox_exporter instances or concurrent probes.
+	// with other voidbox_exporter instances or concurrent probes.
 	return r.Intn(1 << 16)
 }
 
@@ -56,6 +56,20 @@ func getICMPSequence() uint16 {
 	defer icmpSequenceMutex.Unlock()
 	icmpSequence++
 	return icmpSequence
+}
+
+// icmpTypeToInt extracts the numeric ICMP type value from the icmp.Type interface.
+// icmp.Type is implemented by both ipv4.ICMPType and ipv6.ICMPType, so a type
+// switch is required to get the underlying integer value.
+func icmpTypeToInt(t icmp.Type) int {
+	switch v := t.(type) {
+	case ipv4.ICMPType:
+		return int(v)
+	case ipv6.ICMPType:
+		return int(v)
+	default:
+		return -1
+	}
 }
 
 func ProbeICMP(ctx context.Context, target string, module config.Module, registry *prometheus.Registry, logger *slog.Logger) (success bool) {
@@ -74,6 +88,18 @@ func ProbeICMP(ctx context.Context, target string, module config.Module, registr
 		hopLimitGauge = prometheus.NewGauge(prometheus.GaugeOpts{
 			Name: "probe_icmp_reply_hop_limit",
 			Help: "Replied packet hop limit (TTL for ipv4)",
+		})
+
+		// Added: expose the ICMP type and code from received packets so that
+		// network errors (e.g. Destination Unreachable, Time Exceeded) returned
+		// by intermediate hops are visible in probe output for troubleshooting.
+		replyTypeGauge = prometheus.NewGauge(prometheus.GaugeOpts{
+			Name: "probe_icmp_reply_type",
+			Help: "ICMP type of the last received reply packet (numeric). Present for both successful probes and probes that received an ICMP error reply.",
+		})
+		replyCodeGauge = prometheus.NewGauge(prometheus.GaugeOpts{
+			Name: "probe_icmp_reply_code",
+			Help: "ICMP code of the last received reply packet (numeric). Present for both successful probes and probes that received an ICMP error reply.",
 		})
 	)
 
@@ -200,9 +226,9 @@ func ProbeICMP(ctx context.Context, target string, module config.Module, registr
 	var data []byte
 	if module.ICMP.PayloadSize != 0 {
 		data = make([]byte, module.ICMP.PayloadSize)
-		copy(data, "Prometheus Blackbox Exporter")
+		copy(data, "Prometheus Voidbox Exporter")
 	} else {
-		data = []byte("Prometheus Blackbox Exporter")
+		data = []byte("Prometheus Voidbox Exporter")
 	}
 
 	body := &icmp.Echo{
@@ -289,6 +315,15 @@ func ProbeICMP(ctx context.Context, target string, module config.Module, registr
 
 	rb := make([]byte, 65536)
 	deadline, _ := ctx.Deadline()
+
+	// Added: protocol number used when parsing raw ICMP bytes. 1 = IPv4 ICMP, 58 = IPv6 ICMP.
+	proto := 1
+	if dstIPAddr.IP.To4() == nil {
+		proto = 58
+	}
+	// Added: track type/code from the last received ICMP packet. Initialised to
+	// -1 so we can distinguish "nothing received" from a valid type/code of 0.
+	lastReplyType, lastReplyCode := -1, -1
 	if icmpConn != nil {
 		err = icmpConn.SetReadDeadline(deadline)
 	} else {
@@ -338,11 +373,30 @@ func ProbeICMP(ctx context.Context, target string, module config.Module, registr
 		if err != nil {
 			if nerr, ok := err.(net.Error); ok && nerr.Timeout() {
 				logger.Warn("Timeout reading from socket", "err", err)
+				// Added: register type/code on timeout so that any ICMP error reply
+				// received before the deadline (e.g. Time Exceeded, Destination
+				// Unreachable from an intermediate hop) is visible in probe output.
+				if lastReplyType >= 0 {
+					replyTypeGauge.Set(float64(lastReplyType))
+					replyCodeGauge.Set(float64(lastReplyCode))
+					registry.MustRegister(replyTypeGauge, replyCodeGauge)
+				}
 				return
 			}
 			logger.Error("Error reading from socket", "err", err)
 			continue
 		}
+
+		// Added: parse every received ICMP packet to capture type and code before
+		// the peer check, so that ICMP error replies from intermediate routers are
+		// also recorded (those packets fail the peer check and would otherwise be
+		// silently discarded).
+		if parsedMsg, parseErr := icmp.ParseMessage(proto, rb[:n]); parseErr == nil {
+			lastReplyType = icmpTypeToInt(parsedMsg.Type)
+			lastReplyCode = parsedMsg.Code
+			logger.Debug("Received ICMP packet", "type", lastReplyType, "code", lastReplyCode, "peer", peer)
+		}
+
 		if peer.String() != dst.String() {
 			continue
 		}
@@ -362,6 +416,12 @@ func ProbeICMP(ctx context.Context, target string, module config.Module, registr
 			if hopLimit >= 0 {
 				hopLimitGauge.Set(hopLimit)
 				registry.MustRegister(hopLimitGauge)
+			}
+			// Added: register type/code from the matched echo reply.
+			if lastReplyType >= 0 {
+				replyTypeGauge.Set(float64(lastReplyType))
+				replyCodeGauge.Set(float64(lastReplyCode))
+				registry.MustRegister(replyTypeGauge, replyCodeGauge)
 			}
 			logger.Debug("Found matching reply packet")
 			return true

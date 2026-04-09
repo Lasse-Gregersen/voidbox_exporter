@@ -24,7 +24,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/promslog"
 
-	"github.com/prometheus/blackbox_exporter/config"
+	"github.com/Lasse-Gregersen/voidbox_exporter/config"
 )
 
 func TestUnixConnection(t *testing.T) {
@@ -64,7 +64,7 @@ func TestUnixConnection(t *testing.T) {
 
 func TestUnixConnectionFails(t *testing.T) {
 	// Non-existent socket.
-	socketPath := "/tmp/non-existent-socket-for-blackbox-exporter-test"
+	socketPath := "/tmp/non-existent-socket-for-voidbox-exporter-test"
 	os.Remove(socketPath) // Ensure it doesn't exist
 
 	registry := prometheus.NewRegistry()

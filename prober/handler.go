@@ -25,7 +25,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/prometheus/blackbox_exporter/config"
+	"github.com/Lasse-Gregersen/voidbox_exporter/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/expfmt"

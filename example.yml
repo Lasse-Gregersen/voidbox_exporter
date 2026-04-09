@@ -163,7 +163,7 @@ modules:
       tls: true
       tls_config:
         insecure_skip_verify: false
-        ca_file: "/etc/blackbox_exporter/CA_cert.crt"
+        ca_file: "/etc/voidbox_exporter/CA_cert.crt"
   rabbitmq_insecure:
     prober: tcp
     timeout: 30s
@@ -177,7 +177,7 @@ modules:
       tls: true
       tls_config:
         insecure_skip_verify: true
-        ca_file: "/etc/blackbox_exporter/CA_cert.crt"
+        ca_file: "/etc/voidbox_exporter/CA_cert.crt"
   icmp_example:
     prober: icmp
     timeout: 5s

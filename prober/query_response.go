@@ -25,7 +25,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	pconfig "github.com/prometheus/common/config"
 
-	"github.com/prometheus/blackbox_exporter/config"
+	"github.com/Lasse-Gregersen/voidbox_exporter/config"
 )
 
 func probeExpectInfo(registry *prometheus.Registry, qr *config.QueryResponse, bytes []byte, match []int) {

@@ -24,9 +24,9 @@ import (
 func TestLoadConfig(t *testing.T) {
 	sc := NewSafeConfig(prometheus.NewRegistry())
 
-	err := sc.ReloadConfig("testdata/blackbox-good.yml", nil)
+	err := sc.ReloadConfig("testdata/voidbox-good.yml", nil)
 	if err != nil {
-		t.Errorf("Error loading config %v: %v", "blackbox.yml", err)
+		t.Errorf("Error loading config %v: %v", "voidbox.yml", err)
 	}
 }
 
@@ -37,11 +37,11 @@ func TestLoadBadConfigs(t *testing.T) {
 		want  string
 	}{
 		{
-			input: "testdata/blackbox-bad.yml",
+			input: "testdata/voidbox-bad.yml",
 			want:  "error parsing config file: yaml: unmarshal errors:\n  line 50: field invalid_extra_field not found in type config.plain",
 		},
 		{
-			input: "testdata/blackbox-bad2.yml",
+			input: "testdata/voidbox-bad2.yml",
 			want:  "error parsing config file: at most one of bearer_token & bearer_token_file must be configured",
 		},
 		{
@@ -142,9 +142,9 @@ func TestLoadBadConfigs(t *testing.T) {
 func TestHideConfigSecrets(t *testing.T) {
 	sc := NewSafeConfig(prometheus.NewRegistry())
 
-	err := sc.ReloadConfig("testdata/blackbox-good.yml", nil)
+	err := sc.ReloadConfig("testdata/voidbox-good.yml", nil)
 	if err != nil {
-		t.Errorf("Error loading config %v: %v", "testdata/blackbox-good.yml", err)
+		t.Errorf("Error loading config %v: %v", "testdata/voidbox-good.yml", err)
 	}
 
 	// String method must not reveal authentication credentials.

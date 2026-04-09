@@ -26,7 +26,7 @@ import (
 
 	"google.golang.org/grpc/metadata"
 
-	"github.com/prometheus/blackbox_exporter/config"
+	"github.com/Lasse-Gregersen/voidbox_exporter/config"
 	"github.com/prometheus/client_golang/prometheus"
 	pconfig "github.com/prometheus/common/config"
 	"github.com/prometheus/common/promslog"

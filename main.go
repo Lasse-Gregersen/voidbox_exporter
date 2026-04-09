@@ -41,32 +41,32 @@ import (
 	webflag "github.com/prometheus/exporter-toolkit/web/kingpinflag"
 	"go.yaml.in/yaml/v3"
 
-	"github.com/prometheus/blackbox_exporter/config"
-	"github.com/prometheus/blackbox_exporter/prober"
+	"github.com/Lasse-Gregersen/voidbox_exporter/config"
+	"github.com/Lasse-Gregersen/voidbox_exporter/prober"
 )
 
 var (
 	sc = config.NewSafeConfig(prometheus.DefaultRegisterer)
 
-	configFile         = kingpin.Flag("config.file", "Blackbox exporter configuration file.").Default("blackbox.yml").String()
+	configFile         = kingpin.Flag("config.file", "Voidbox exporter configuration file.").Default("voidbox.yml").String()
 	timeoutOffset      = kingpin.Flag("timeout-offset", "Offset to subtract from timeout in seconds.").Default("0.5").Float64()
 	configCheck        = kingpin.Flag("config.check", "If true validate the config file and then exit.").Default().Bool()
 	logLevelProber     = kingpin.Flag("log.prober", "Log level for probe request logs. One of: [debug, info, warn, error]. Please see the section `Controlling log level for probe logs` in the project README for more information.").Default("info").String()
-	enableAutoReload   = kingpin.Flag("config.enable-auto-reload", "When enabled, Blackbox exporter will automatically reload its configuration file at a specified interval. The interval is defined by the `--config.auto-reload-interval` flag, which defaults to `30s`").Default().Bool()
+	enableAutoReload   = kingpin.Flag("config.enable-auto-reload", "When enabled, Voidbox exporter will automatically reload its configuration file at a specified interval. The interval is defined by the `--config.auto-reload-interval` flag, which defaults to `30s`").Default().Bool()
 	autoReloadInterval = kingpin.Flag("config.auto-reload-interval", "Specifies the interval in seconds for checking and automatically reloading configuration file upon detecting changes.").Default("30").Uint()
 	historyLimit       = kingpin.Flag("history.limit", "The maximum amount of items to keep in the history.").Default("100").Uint()
-	externalURL        = kingpin.Flag("web.external-url", "The URL under which Blackbox exporter is externally reachable (for example, if Blackbox exporter is served via a reverse proxy). Used for generating relative and absolute links back to Blackbox exporter itself. If the URL has a path portion, it will be used to prefix all HTTP endpoints served by Blackbox exporter. If omitted, relevant URL components will be derived automatically.").PlaceHolder("<url>").String()
+	externalURL        = kingpin.Flag("web.external-url", "The URL under which Voidbox exporter is externally reachable (for example, if Voidbox exporter is served via a reverse proxy). Used for generating relative and absolute links back to Voidbox exporter itself. If the URL has a path portion, it will be used to prefix all HTTP endpoints served by Voidbox exporter. If omitted, relevant URL components will be derived automatically.").PlaceHolder("<url>").String()
 	routePrefix        = kingpin.Flag("web.route-prefix", "Prefix for the internal routes of web endpoints. Defaults to path of --web.external-url.").PlaceHolder("<path>").String()
 	toolkitFlags       = webflag.AddFlags(kingpin.CommandLine, ":9115")
 
 	moduleUnknownCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "blackbox_module_unknown_total",
+		Name: "voidbox_module_unknown_total",
 		Help: "Count of unknown modules requested by probes",
 	})
 )
 
 func init() {
-	prometheus.MustRegister(versioncollector.NewCollector("blackbox_exporter"))
+	prometheus.MustRegister(versioncollector.NewCollector("voidbox_exporter"))
 }
 
 func main() {
@@ -77,7 +77,7 @@ func run() int {
 	kingpin.CommandLine.UsageWriter(os.Stdout)
 	promslogConfig := &promslog.Config{}
 	flag.AddFlags(kingpin.CommandLine, promslogConfig)
-	kingpin.Version(version.Print("blackbox_exporter"))
+	kingpin.Version(version.Print("voidbox_exporter"))
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
 	logger := promslog.New(promslogConfig)
@@ -95,7 +95,7 @@ func run() int {
 		Style:  promslogConfig.Style,
 	}
 
-	logger.Info("Starting blackbox_exporter", "version", version.Info())
+	logger.Info("Starting voidbox_exporter", "version", version.Info())
 	logger.Info(version.BuildContext())
 
 	if err := sc.ReloadConfig(*configFile, logger); err != nil {
@@ -110,7 +110,7 @@ func run() int {
 
 	logger.Info("Loaded config file")
 
-	// Infer or set Blackbox exporter externalURL
+	// Infer or set Voidbox exporter externalURL
 	listenAddrs := toolkitFlags.WebListenAddresses
 	if *externalURL == "" && *toolkitFlags.WebSystemdSocket {
 		logger.Error("Cannot automatically infer external URL with systemd socket listener. Please provide --web.external-url")
@@ -213,9 +213,9 @@ func run() int {
 	http.HandleFunc(*routePrefix, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		w.Write([]byte(`<html>
-    <head><title>Blackbox Exporter</title></head>
+    <head><title>Voidbox Exporter</title></head>
     <body>
-    <h1>Blackbox Exporter</h1>
+    <h1>Voidbox Exporter</h1>
     <p><a href="probe?target=prometheus.io&module=http_2xx">Probe prometheus.io for http_2xx</a></p>
     <p><a href="probe?target=prometheus.io&module=http_2xx&debug=true">Debug probe prometheus.io for http_2xx</a></p>
     <p><a href="metrics">Metrics</a></p>

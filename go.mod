@@ -1,4 +1,4 @@
-module github.com/prometheus/blackbox_exporter
+module github.com/Lasse-Gregersen/voidbox_exporter
 
 go 1.25.0
 

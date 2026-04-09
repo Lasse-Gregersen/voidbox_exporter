@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/prometheus/blackbox_exporter/config"
+	"github.com/Lasse-Gregersen/voidbox_exporter/config"
 	"github.com/prometheus/client_golang/prometheus"
 	promconfig "github.com/prometheus/common/config"
 )

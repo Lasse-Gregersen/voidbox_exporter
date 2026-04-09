@@ -13,13 +13,13 @@ jobs:
       - prometheus/setup_environment
       - run: make
       - prometheus/store_artifact:
-          file: blackbox_exporter
+          file: voidbox_exporter
       - run: git diff --exit-code
   # IPv6 tests require the machine executor.
   # See https://circleci.com/docs/2.0/faq/#can-i-use-ipv6-in-my-tests for details.
   test-ipv6:
     machine: true
-    working_directory: /home/circleci/.go_workspace/src/github.com/prometheus/blackbox_exporter
+    working_directory: /home/circleci/.go_workspace/src/github.com/prometheus/voidbox_exporter
     # Whenever the Go version is updated here, .promu.yml should also be updated.
     environment:
       DOCKER_TEST_IMAGE_NAME: quay.io/prometheus/golang-builder:1.25-base
@@ -35,10 +35,10 @@ jobs:
             }
             EOF
             sudo service docker restart
-      - run: docker run --rm -t -v "$(pwd):/app" "${DOCKER_TEST_IMAGE_NAME}" -i github.com/prometheus/blackbox_exporter -T
+      - run: docker run --rm -t -v "$(pwd):/app" "${DOCKER_TEST_IMAGE_NAME}" -i github.com/prometheus/voidbox_exporter -T
 workflows:
   version: 2
-  blackbox_exporter:
+  voidbox_exporter:
     jobs:
       - test:
           filters:

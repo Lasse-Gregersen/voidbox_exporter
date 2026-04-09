@@ -9,10 +9,10 @@
 -->
 ### Host operating system: output of `uname -a`
 
-### blackbox_exporter version: output of `blackbox_exporter --version`
+### voidbox_exporter version: output of `voidbox_exporter --version`
 <!-- If building from source, run `make` first. -->
 
-### What is the blackbox.yml module config.
+### What is the voidbox.yml module config.
 
 ### What is the prometheus.yml scrape config.
 

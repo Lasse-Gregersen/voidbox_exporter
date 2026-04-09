@@ -32,7 +32,7 @@ import (
 	pconfig "github.com/prometheus/common/config"
 	"github.com/prometheus/common/promslog"
 
-	"github.com/prometheus/blackbox_exporter/config"
+	"github.com/Lasse-Gregersen/voidbox_exporter/config"
 )
 
 func TestTCPConnection(t *testing.T) {

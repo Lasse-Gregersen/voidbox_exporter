@@ -45,7 +45,7 @@ import (
 	"github.com/prometheus/common/promslog"
 	"github.com/quic-go/quic-go/http3"
 
-	"github.com/prometheus/blackbox_exporter/config"
+	"github.com/Lasse-Gregersen/voidbox_exporter/config"
 )
 
 func TestHTTPStatusCodes(t *testing.T) {

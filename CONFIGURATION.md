@@ -1,4 +1,4 @@
-# Blackbox exporter configuration
+# Voidbox exporter configuration
 
 The file is written in [YAML format](http://en.wikipedia.org/wiki/YAML), defined by the scheme described below.
 Brackets indicate that a parameter is optional.
@@ -27,7 +27,7 @@ modules:
 
 ### Address selection
 
-The blackbox_exporter is a testing tool.  Because of this requirement it
+The voidbox_exporter is a testing tool.  Because of this requirement it
 does not behave like a typical end-user client.  Only a single connection
 attempt is made to the target under test.  There is no "happy eyeballs"
 style of connection parallelization or retry.
@@ -535,11 +535,11 @@ query_response:
 
 #### `<oauth2>`
 
-OAuth 2.0 authentication using the client credentials grant type. Blackbox
+OAuth 2.0 authentication using the client credentials grant type. Voidbox
 exporter fetches an access token from the specified endpoint with the given
 client access and secret keys.
 
-NOTE: This is *experimental* in the blackbox exporter and might not be
+NOTE: This is *experimental* in the voidbox exporter and might not be
 reflected properly in the probe metrics at the moment.
 
 ```yml
